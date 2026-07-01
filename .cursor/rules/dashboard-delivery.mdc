@@ -1,0 +1,10 @@
+---
+description: Remind agents of dashboard JS boot order when editing HTML reports
+globs: ["reports/**/*.html", "**/*dashboard*.html"]
+alwaysApply: false
+---
+# Dashboard delivery
+
+When creating or editing HTML dashboards in this repo, read and follow `.cursor/skills/visual-style-guide/SKILL.md`.
+
+**Non-negotiable for working demos:** declare `charts` and data constants before any function calls them; wire tabs/table listeners before `initCharts()`; run `initCharts()` once at the end of the script block. A silent failure leaves blank 300×150 canvases and dead tab links.

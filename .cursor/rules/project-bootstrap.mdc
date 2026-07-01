@@ -1,0 +1,18 @@
+---
+description: Bootstrap Python venv before MCP or Python work in this repo
+alwaysApply: true
+---
+# Project bootstrap
+
+Before calling MCP tools, running Python, or building analytics artifacts in this repo:
+
+1. **Check for `.venv/`** at the project root.
+2. **If missing**, create and install dependencies:
+   ```bash
+   python3 -m venv .venv
+   .venv/bin/pip install -r requirements.txt
+   ```
+3. Do not assume MCP is ready just because tools respond — .cursor/mcp.json expects .venv/bin/fastmcp.
+4. Run bootstrap even when the user task is only "query data", "check the knowledge base", or "build a dashboard"; environment setup is a prerequisite, not a separate ask.
+
+After bootstrap, remind the user to restart or reload the MCP server in Cursor if it was not already running.
