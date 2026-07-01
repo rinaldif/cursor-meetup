@@ -104,16 +104,23 @@ Use brand tokens from Section 4 — never Chart.js default palettes.
 
 Only the segment on the baseline is easy to compare across stacks. On legend click, **reorder** the stack so the clicked segment snaps to the baseline (bottom vertical / left horizontal). Do not hide series on legend click. Per-segment color is appropriate here.
 
-Implementation sketch — override Chart.js legend `onClick`, splice the clicked dataset to index 0, call `chart.update()`:
+**Chart.js gotcha:** `onClick` must live on `plugins.legend`, **not** on `plugins.legend.labels`. Putting it under `labels` is silently ignored — Chart.js keeps its default behavior (toggle hide/show on click), which looks broken for stacked bars.
+
+Implementation — override `plugins.legend.onClick`, splice the clicked dataset to index 0, call `chart.update()` (do **not** call the default handler):
 
 ```javascript
-onClick(e, legendItem, legend) {
-  const chart = legend.chart;
-  const idx = legendItem.datasetIndex;
-  if (idx === 0) return;
-  const [picked] = chart.data.datasets.splice(idx, 1);
-  chart.data.datasets.unshift(picked);
-  chart.update();
+// Inside options.plugins.legend — NOT inside .labels
+legend: {
+  position: 'bottom',
+  onClick(e, legendItem, legend) {
+    const chart = legend.chart;
+    const idx = legendItem.datasetIndex;
+    if (idx === 0) return;
+    const [picked] = chart.data.datasets.splice(idx, 1);
+    chart.data.datasets.unshift(picked);
+    chart.update();
+  },
+  labels: { /* styling only — no onClick here */ }
 }
 ```
 
