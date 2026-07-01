@@ -21,14 +21,15 @@ Build polished, self-contained single-file HTML dashboards. For decision framing
 - Dark theme with CSS custom properties
 
 **Charts — pick one path:**
-- **Preferred for reliability:** 1–2 Chart.js charts (line + horizontal ranked bar), pinned CDN below
+- **Preferred for reliability:** stacked bar for category composition over time + horizontal ranked bar for period totals (pinned Chart.js CDN below)
+- **Line charts:** single-metric trends only — not multi-series breakdowns by category (unreadable above ~3 series)
 - **Acceptable:** CSS bar rows (`width: N%` on a div) for categorical breakdowns — no Chart.js needed
 
-**Optional (add only if straightforward):** second tab, theme toggle, stacked composition chart
+**Optional (add only if straightforward):** second tab, theme toggle
 
 ### Full dashboard (when time allows)
 
-Add theme toggle, tabs, multi-chart layouts, stacked bars with baseline-snap legend. Do not add these if they jeopardize a working MVP.
+Add theme toggle, tabs, multi-chart layouts. Do not add these if they jeopardize a working MVP.
 
 ## 2. Tech stack
 
@@ -89,18 +90,32 @@ Use brand tokens from Section 4 — never Chart.js default palettes.
 
 | Type | Use for |
 |---|---|
-| Line | Continuous trends over time |
+| Line | Single-metric trends over time (one series, or at most two for comparison) |
 | Horizontal bar | Ranked category comparison — single neutral fill per bar |
-| Stacked bar | Mutually exclusive composition over time |
+| Stacked bar | Category composition over time — default when breaking a metric down by dimension across periods |
 
 - Wrap canvases in fixed-height containers; `maintainAspectRatio: false`
 - Compact charts ~180–220px; stacked/multi-series ~260–320px
 - Match time grain to window (weekly for multi-month ranges)
 - Custom tooltip formatting; no pie charts (horizontal bars or KPI tiles instead)
+- Add a one-line chart subtitle when stacked bars are used: *"Click a legend item to snap that category to the baseline."*
 
 ### Stacked bar baseline snap (required when using stacked bars)
 
 Only the segment on the baseline is easy to compare across stacks. On legend click, **reorder** the stack so the clicked segment snaps to the baseline (bottom vertical / left horizontal). Do not hide series on legend click. Per-segment color is appropriate here.
+
+Implementation sketch — override Chart.js legend `onClick`, splice the clicked dataset to index 0, call `chart.update()`:
+
+```javascript
+onClick(e, legendItem, legend) {
+  const chart = legend.chart;
+  const idx = legendItem.datasetIndex;
+  if (idx === 0) return;
+  const [picked] = chart.data.datasets.splice(idx, 1);
+  chart.data.datasets.unshift(picked);
+  chart.update();
+}
+```
 
 ### Tabs (optional)
 
